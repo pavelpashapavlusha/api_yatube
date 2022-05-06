@@ -5,7 +5,7 @@ from posts.models import Comment, Group, Post, User
 
 from .permissions import IsOwnerOrReadOnly
 from .serializers import (CommentSerializer, GroupSerializer,
-                          PostListSerializer, PostSerializer, UserSerializer)
+                          PostSerializer, UserSerializer)
 
 
 class CreateRetrieveViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
@@ -25,11 +25,6 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
-    def get_serializer_class(self):
-        if self.action == 'list':
-            return PostListSerializer
-        return PostSerializer
 
 
 class GroupViewSet(viewsets. ReadOnlyModelViewSet):
