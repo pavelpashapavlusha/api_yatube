@@ -1,5 +1,6 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets
+from rest_framework.permissions import IsAuthenticated
 
 from posts.models import Comment, Group, Post, User
 
@@ -21,7 +22,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_class = IsOwnerOrReadOnly
+    permission_class = (IsAuthenticated, IsOwnerOrReadOnly)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -34,7 +35,7 @@ class GroupViewSet(viewsets. ReadOnlyModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_class = IsOwnerOrReadOnly
+    permission_class = (IsAuthenticated, IsOwnerOrReadOnly)
 
     def get_queryset(self):
         post_id = self.kwargs.get('post_id')
