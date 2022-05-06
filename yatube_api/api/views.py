@@ -22,7 +22,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_class = (IsAuthenticated, IsOwnerOrReadOnly)
+    permission_class = (IsAuthenticated, IsOwnerOrReadOnly, )
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -35,7 +35,7 @@ class GroupViewSet(viewsets. ReadOnlyModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-    permission_class = (IsAuthenticated, IsOwnerOrReadOnly)
+    permission_class = (IsAuthenticated, IsOwnerOrReadOnly, )
 
     def get_queryset(self):
         post_id = self.kwargs.get('post_id')
