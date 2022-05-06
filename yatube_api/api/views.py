@@ -1,12 +1,13 @@
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
-from posts.models import Group, Post, User
 from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
 
+from posts.models import Group, Post, User
+
 from .permissions import IsOwnerOrReadOnly
-from .serializers import (CommentSerializer, GroupSerializer,
-                          PostSerializer, UserSerializer)
+from .serializers import (CommentSerializer, GroupSerializer, PostSerializer,
+                          UserSerializer)
 
 
 class CreateRetrieveViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
