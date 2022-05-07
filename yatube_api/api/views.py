@@ -1,13 +1,13 @@
-from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404
 from rest_framework import mixins, viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import (
+    IsAuthenticated, IsAuthenticatedOrReadOnly
+)
 
-from posts.models import Group, Post, User
+from posts.models import Group, Post
 
 from .permissions import IsOwnerOrReadOnly
-from .serializers import (CommentSerializer, GroupSerializer, PostSerializer,
-                          UserSerializer)
+from .serializers import (CommentSerializer, GroupSerializer, PostSerializer,)
 
 
 class CreateRetrieveViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
@@ -15,28 +15,15 @@ class CreateRetrieveViewSet(mixins.CreateModelMixin, mixins.RetrieveModelMixin,
     pass
 
 
-class UserViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = (IsOwnerOrReadOnly, IsAuthenticated)
+    permission_classes = (
+        IsOwnerOrReadOnly, IsAuthenticated, IsAuthenticatedOrReadOnly
+    )
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
-
-    def perform_update(self, serializer):
-        if serializer.instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого контента запрещено!')
-        super(PostViewSet, self).perform_update(serializer)
-
-    def perform_destroy(self, instance):
-        if instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого контента запрещено!')
-        super(PostViewSet, self).perform_destroy(instance)
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -46,21 +33,14 @@ class GroupViewSet(viewsets.ReadOnlyModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+    permission_classes = (
+        IsOwnerOrReadOnly, IsAuthenticated, IsAuthenticatedOrReadOnly
+    )
 
     def get_queryset(self):
         post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
-        return post.comments
+        return post.comments.all()
 
     def perform_create(self, serializer):
         post = get_object_or_404(Post, pk=self.kwargs.get('post_id'))
         serializer.save(author=self.request.user, post=post)
-
-    def perform_destroy(self, instance):
-        if instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого контента запрещено!')
-        super(CommentViewSet, self).perform_destroy(instance)
-
-    def perform_update(self, serializer):
-        if serializer.instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого контента запрещено!')
-        super(CommentViewSet, self).perform_update(serializer)
